@@ -1,4 +1,4 @@
-dist: 'xenial'
+dist: xenial
 language: python
 python:
 - '3.7'
@@ -14,3 +14,13 @@ script:
 - python setup.py -q install
 - pylint **/*.py
 - robot tests/
+deploy:
+- provider: pypi
+  user: vogoltsov
+  password:
+    secure: 'zj59b26Btr+wCAZsU2JTTRCnU/yvp3jiUHS2AHqCQbevNmBzA2X6lVARViHuneJ2n1y+6jx04EmCboagWOkB8a6qqMgnRwsC80OWLfTwdBHXMUkmgLIcFn2wgMkuHSQfEvzCmVOtuD732yU3N142gpOfi2NMPCOPu3REf+nAa8i8IM8zsFuKt1VCN/f+IsUUedyZlgibA61JZ2lK5+6uYRSA3wNsNKkYplry/uTRMG7smzwDksluuAodG94qfjDlrUCwRSXPv9PNFNYsDAgo6nAnVQYkitQGqU2hgSRMrKkrpL01jWqX2E+caa9YgeVgtFux8GmPKz7JUk2EeuXzAQecSTawWjVcLWIOkxc70Gljy1THCc7g8SUbprqikhtW6ImxQTvzJJKXoeg7i6ZEtXJE/aDOIfXvTOwGwTPIzr24Iq+MNR7Pt6awjQiRqZ1JObl5ecGMP7sYjcqaF/6f7Naovkx586bSTXnWveWbjaVkNwh4wTBFDZOO4zgloH15Y8bgPuUq491sBqMn5tjTa/aJ0Yv1Ajr6+vQVXfKyYKpVHQfkyTh6Gr0Jmwfy8Zbx+7SqEUXFtAnLekgbbayqNuwLpjiHIBjfW0MHvRWKWkrrtmraNzPRlgmFsyenKxZI9augb8EqHRs/OGcPgAqjzO39QHAWnxE09iKbZoCwkzY='
+  distributions: 'sdist bdist_wheel'
+  on:
+    repo: vogoltsov/robotframework-docker
+    tags: true
+  skip_cleanup: true
