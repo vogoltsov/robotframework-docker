@@ -23,6 +23,14 @@ Short Description
 Installation
 ------------
 
+Installation using pip
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+   pip3 install robotframework-docker
+
+
 Installation from sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
