@@ -26,6 +26,7 @@ setup(
         'Topic :: Software Development :: Testing',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Framework :: Robot Framework :: Library',
     ],
     keywords='testing testautomation robotframework docker docker-compose',
