@@ -57,7 +57,10 @@ class DockerComposeLibrary:
         else:
             self._project_name = BuiltIn().get_variable_value('${SUITE NAME}')
 
-        self._project_directory = project_directory
+        if project_directory is not None:
+            self._project_directory = project_directory
+        else:
+            self._project_directory = os.path.dirname(self._file)
 
         logger.info('Docker Compose project "{}" initialized using configuration file: {}'
                     .format(self._project_name, self._file))
@@ -157,7 +160,7 @@ class DockerComposeLibrary:
             cmd.extend(service_names)
 
         try:
-            subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            subprocess.check_output(cmd, cwd=self._project_directory, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise AssertionError('Failed to start services: {}'
                                  .format(e.output.decode('utf-8').rstrip()))
@@ -220,7 +223,7 @@ class DockerComposeLibrary:
             cmd.append('--remove-orphans')
 
         try:
-            subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            subprocess.check_output(cmd, cwd=self._project_directory, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise AssertionError('Failed to shutdown services: {}'
                                  .format(e.output.decode('utf-8').rstrip()))
@@ -255,7 +258,7 @@ class DockerComposeLibrary:
         cmd.append(service_name)
         cmd.append(str(port))
         try:
-            output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            output = subprocess.check_output(cmd, cwd=self._project_directory, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise AssertionError(e.output.decode('utf-8').rstrip())
         result = output.decode('utf-8').rstrip().split(':')

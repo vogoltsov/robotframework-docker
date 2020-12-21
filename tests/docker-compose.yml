@@ -3,4 +3,4 @@ services:
   httpd:
     image: 'httpd:alpine'
     ports:
-    - 80
+    - ${HTTPD_PORT}
