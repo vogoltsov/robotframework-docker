@@ -5,9 +5,9 @@
 import os
 import re
 import subprocess
+from typing import List
 
 import packaging.version
-
 from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
 from robot.libraries.DateTime import convert_time
@@ -74,7 +74,7 @@ class DockerComposeLibrary:
                           build: bool = False,
                           renew_anon_volumes: bool = True,
                           remove_orphans: bool = True,
-                          service_names: [str] = None) -> None:
+                          service_names: List[str] = None) -> None:
         """Builds, (re)creates, starts, and attaches to containers for a service.
         All parameters are forwarded to `docker-compose`.
 

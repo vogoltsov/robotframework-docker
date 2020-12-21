@@ -12,7 +12,7 @@ Can Start Services Using Docker Compose
 Can Start Service by Name
     @{service_names} =  Create List
     ...                 httpd
-    Docker Compose Up   service_names=@{service_names}
+    Docker Compose Up   service_names=${service_names}
 
 Cannot Start Service by Name If It Does Not Exist
     @{service_names} =  Create List
@@ -20,7 +20,7 @@ Cannot Start Service by Name If It Does Not Exist
     Run Keyword And Expect Error
     ...                 *No such service*
     ...                 Docker Compose Up
-    ...                 service_names=@{service_names}
+    ...                 service_names=${service_names}
 
 Can Get Service Host and Port
     Docker Compose Up
