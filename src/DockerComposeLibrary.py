@@ -163,7 +163,7 @@ class DockerComposeLibrary:
             subprocess.check_output(cmd, cwd=self._project_directory, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise AssertionError('Failed to start services: {}'
-                                 .format(e.output.decode('utf-8').rstrip()))
+                                 .format(e.output.decode('utf-8').rstrip())) from e
 
     def docker_compose_down(self,
                             timeout: str = None,
@@ -226,7 +226,7 @@ class DockerComposeLibrary:
             subprocess.check_output(cmd, cwd=self._project_directory, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise AssertionError('Failed to shutdown services: {}'
-                                 .format(e.output.decode('utf-8').rstrip()))
+                                 .format(e.output.decode('utf-8').rstrip())) from e
 
     def get_exposed_service(self,
                             service_name: str,
@@ -260,7 +260,7 @@ class DockerComposeLibrary:
         try:
             output = subprocess.check_output(cmd, cwd=self._project_directory, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            raise AssertionError(e.output.decode('utf-8').rstrip())
+            raise AssertionError(e.output.decode('utf-8').rstrip()) from e
         result = output.decode('utf-8').rstrip().split(':')
         if len(result) == 1:
             raise AssertionError('Port {} is not exposed for service {}'.format(port, service_name))
@@ -284,8 +284,8 @@ class DockerComposeLibrary:
             ]).decode('utf-8').rstrip()
             version_string = re.findall(r'(?:(\d+\.(?:\d+\.)*\d+))', version_string)[0]
             return packaging.version.parse(version_string)
-        except Exception:
-            raise AssertionError('Could not determine docker-compose version')
+        except Exception as e:
+            raise AssertionError('Could not determine docker-compose version') from e
 
     @staticmethod
     def _is_inside_container() -> bool:
