@@ -2,7 +2,7 @@ name: Publish Python package to PyPi.org
 
 on:
   release:
-    types: [ created ]
+    types: [ published ]
 
 jobs:
   deploy:
