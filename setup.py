@@ -13,7 +13,7 @@ with open(os.path.join(here, 'README.rst'), encoding='utf-8') as readme_file:
 
 setup(
     name='robotframework-docker',
-    version='1.0.1',
+    version='1.1.0.dev1',
     description='A Robot Framework Docker Library',
     long_description=long_description,
     url='https://github.com/vogoltsov/robotframework-docker',
