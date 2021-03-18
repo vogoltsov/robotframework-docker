@@ -77,8 +77,7 @@ class DockerComposeLibrary:
 
         `include_deps` Also pull services declared as dependencies (default: False).
 
-        `service_names` A list of service names to be started.
-        All services are started by default.
+        `service_names` A list of service names to be pulled.
 
 
         = Examples =
@@ -107,6 +106,81 @@ class DockerComposeLibrary:
                                     stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise AssertionError('Failed to pull image(s): {}'
+                                 .format(e.output.decode('utf-8').rstrip())) from e
+
+    # pylint: disable=R0912, R0913, C0103
+    def docker_compose_build(self,
+                             compress: bool = False,
+                             force_rm: bool = False,
+                             no_cache: bool = False,
+                             no_rm: bool = False,
+                             parallel: bool = False,
+                             pull: bool = False,
+                             build_args: dict[str, str] = None,
+                             service_names: List[str] = None) -> None:
+        """Build or rebuild services.
+        All parameters are forwarded to `docker-compose`.
+
+        `compress` Compress the build context using gzip (default: False).
+
+        `force_rm` Always remove intermediate containers (default: False).
+
+        `no_cache` Do not use cache when building the image (default: False).
+
+        `no_rm` Do not intermediate containers after a successful build (default: False).
+
+        `parallel` Build images in parallel (default: False).
+
+        `pull` Always attempt to pull a newer version of the image (default: False).
+
+        `service_names` A list of service names to be built.
+        All services are started by default.
+
+
+        = Examples =
+
+        Build Images
+        | Docker Compose Build |
+        """
+
+        cmd: [str] = self._prepare_base_cmd()
+        cmd.append('build')
+        cmd.append('--quiet')
+
+        if compress:
+            cmd.append('--compress')
+
+        if force_rm:
+            cmd.append('--force-rm')
+
+        if no_cache:
+            cmd.append('--no-cache')
+
+        if no_rm:
+            cmd.append('--no-rm')
+
+        if parallel:
+            cmd.append('--parallel')
+
+        if pull:
+            cmd.append('--pull')
+
+        if build_args is not None:
+            for key, value in build_args.items():
+                cmd.append('--build-arg')
+                cmd.append(f'{key}={value}')
+
+        if service_names is not None:
+            cmd.extend(service_names)
+
+        logger.warn(cmd)
+        try:
+            subprocess.check_output(cmd,
+                                    cwd=self._project_directory,
+                                    stdin=subprocess.DEVNULL,
+                                    stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            raise AssertionError('Failed to build image(s): {}'
                                  .format(e.output.decode('utf-8').rstrip())) from e
 
     # pylint: disable=R0912, R0913, C0103
@@ -204,7 +278,10 @@ class DockerComposeLibrary:
             cmd.extend(service_names)
 
         try:
-            subprocess.check_output(cmd, cwd=self._project_directory, stderr=subprocess.STDOUT)
+            subprocess.check_output(cmd,
+                                    cwd=self._project_directory,
+                                    stdin=subprocess.DEVNULL,
+                                    stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise AssertionError('Failed to start services: {}'
                                  .format(e.output.decode('utf-8').rstrip())) from e
@@ -267,7 +344,10 @@ class DockerComposeLibrary:
             cmd.append('--remove-orphans')
 
         try:
-            subprocess.check_output(cmd, cwd=self._project_directory, stderr=subprocess.STDOUT)
+            subprocess.check_output(cmd,
+                                    cwd=self._project_directory,
+                                    stdin=subprocess.DEVNULL,
+                                    stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise AssertionError('Failed to shutdown services: {}'
                                  .format(e.output.decode('utf-8').rstrip())) from e
@@ -302,7 +382,10 @@ class DockerComposeLibrary:
         cmd.append(service_name)
         cmd.append(str(port))
         try:
-            output = subprocess.check_output(cmd, cwd=self._project_directory, stderr=subprocess.STDOUT)
+            output = subprocess.check_output(cmd,
+                                             cwd=self._project_directory,
+                                             stdin=subprocess.DEVNULL,
+                                             stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise AssertionError(e.output.decode('utf-8').rstrip()) from e
         result = output.decode('utf-8').rstrip().split(':')
