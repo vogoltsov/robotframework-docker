@@ -66,6 +66,50 @@ class DockerComposeLibrary:
                     .format(self._project_name, self._file))
 
     # pylint: disable=R0912, R0913, C0103
+    def docker_compose_pull(self,
+                            no_parallel: bool = False,
+                            include_deps: bool = False,
+                            service_names: List[str] = None) -> None:
+        """Pulls images for services defined in a Compose file, but does not start the containers.
+        All parameters are forwarded to `docker-compose`.
+
+        `no_parallel` Disable parallel pulling (default: False).
+
+        `include_deps` Also pull services declared as dependencies (default: False).
+
+        `service_names` A list of service names to be started.
+        All services are started by default.
+
+
+        = Examples =
+
+        Pull All Service Images
+        | Docker Compose Pull |
+        """
+
+        cmd: [str] = self._prepare_base_cmd()
+        cmd.append('pull')
+        cmd.append('--quiet')
+
+        if no_parallel:
+            cmd.append('--no-parallel')
+
+        if include_deps:
+            cmd.append('--include-deps')
+
+        if service_names is not None:
+            cmd.extend(service_names)
+
+        try:
+            subprocess.check_output(cmd,
+                                    cwd=self._project_directory,
+                                    stdin=subprocess.DEVNULL,
+                                    stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            raise AssertionError('Failed to pull image(s): {}'
+                                 .format(e.output.decode('utf-8').rstrip())) from e
+
+    # pylint: disable=R0912, R0913, C0103
     def docker_compose_up(self,
                           timeout: str = '10 seconds',
                           no_deps: bool = False,
