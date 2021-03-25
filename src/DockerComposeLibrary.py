@@ -5,6 +5,7 @@
 import os
 import re
 import subprocess
+import sys
 from typing import List
 
 import packaging.version
@@ -103,10 +104,12 @@ class DockerComposeLibrary:
             subprocess.check_output(cmd,
                                     cwd=self._project_directory,
                                     stdin=subprocess.DEVNULL,
-                                    stderr=subprocess.STDOUT)
+                                    stderr=subprocess.STDOUT,
+                                    encoding=sys.getdefaultencoding(),
+                                    text=True)
         except subprocess.CalledProcessError as e:
             raise AssertionError('Failed to pull image(s): {}'
-                                 .format(e.output.decode('utf-8').rstrip())) from e
+                                 .format(e.output.rstrip())) from e
 
     # pylint: disable=R0912, R0913, C0103
     def docker_compose_build(self,
@@ -178,10 +181,12 @@ class DockerComposeLibrary:
             subprocess.check_output(cmd,
                                     cwd=self._project_directory,
                                     stdin=subprocess.DEVNULL,
-                                    stderr=subprocess.STDOUT)
+                                    stderr=subprocess.STDOUT,
+                                    encoding=sys.getdefaultencoding(),
+                                    text=True)
         except subprocess.CalledProcessError as e:
             raise AssertionError('Failed to build image(s): {}'
-                                 .format(e.output.decode('utf-8').rstrip())) from e
+                                 .format(e.output.rstrip())) from e
 
     # pylint: disable=R0912, R0913, C0103
     def docker_compose_up(self,
@@ -281,10 +286,12 @@ class DockerComposeLibrary:
             subprocess.check_output(cmd,
                                     cwd=self._project_directory,
                                     stdin=subprocess.DEVNULL,
-                                    stderr=subprocess.STDOUT)
+                                    stderr=subprocess.STDOUT,
+                                    encoding=sys.getdefaultencoding(),
+                                    text=True)
         except subprocess.CalledProcessError as e:
             raise AssertionError('Failed to start services: {}'
-                                 .format(e.output.decode('utf-8').rstrip())) from e
+                                 .format(e.output.rstrip())) from e
 
     def docker_compose_down(self,
                             timeout: str = None,
@@ -347,10 +354,12 @@ class DockerComposeLibrary:
             subprocess.check_output(cmd,
                                     cwd=self._project_directory,
                                     stdin=subprocess.DEVNULL,
-                                    stderr=subprocess.STDOUT)
+                                    stderr=subprocess.STDOUT,
+                                    encoding=sys.getdefaultencoding(),
+                                    text=True)
         except subprocess.CalledProcessError as e:
             raise AssertionError('Failed to shutdown services: {}'
-                                 .format(e.output.decode('utf-8').rstrip())) from e
+                                 .format(e.output.rstrip())) from e
 
     def get_exposed_service(self,
                             service_name: str,
@@ -385,10 +394,12 @@ class DockerComposeLibrary:
             output = subprocess.check_output(cmd,
                                              cwd=self._project_directory,
                                              stdin=subprocess.DEVNULL,
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             encoding=sys.getdefaultencoding(),
+                                             text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError(e.output.decode('utf-8').rstrip()) from e
-        result = output.decode('utf-8').rstrip().split(':')
+            raise AssertionError(e.output.rstrip()) from e
+        result = output.rstrip().split(':')
         if len(result) == 1:
             raise AssertionError('Port {} is not exposed for service {}'.format(port, service_name))
         return result
@@ -401,14 +412,19 @@ class DockerComposeLibrary:
             '--file', self._file,
         ]
 
-    @staticmethod
-    def _get_docker_compose_version() -> packaging.version.Version:
+    def _get_docker_compose_version(self) -> packaging.version.Version:
         """Helper function to retrieve docker-compose version"""
         try:
-            version_string = subprocess.check_output([
+            cmd = [
                 'docker-compose',
                 '--version',
-            ]).decode('utf-8').rstrip()
+            ]
+            version_string = subprocess.check_output(cmd,
+                                                     cwd=self._project_directory,
+                                                     stdin=subprocess.DEVNULL,
+                                                     stderr=subprocess.STDOUT,
+                                                     encoding=sys.getdefaultencoding(),
+                                                     text=True).rstrip()
             version_string = re.findall(r'(?:(\d+\.(?:\d+\.)*\d+))', version_string)[0]
             return packaging.version.parse(version_string)
         except Exception as e:
@@ -419,16 +435,22 @@ class DockerComposeLibrary:
         """Helper function to check whether the test is running inside a Docker container."""
         return os.path.exists('/.dockerenv')
 
-    @staticmethod
-    def _get_container_gateway_ip() -> str:
+    def _get_container_gateway_ip(self) -> str:
         """Helper function to retrieve current Docker container gateway ip address."""
-        return subprocess.check_output([
+        cmd = [
             'docker',
             'inspect',
             '-f',
             '{{range .NetworkSettings.Networks}}{{.Gateway}}{{end}}',
             DockerComposeLibrary._get_container_id()
-        ]).decode('utf-8').rstrip()
+        ]
+        output = subprocess.check_output(cmd,
+                                         cwd=self._project_directory,
+                                         stdin=subprocess.DEVNULL,
+                                         stderr=subprocess.STDOUT,
+                                         encoding=sys.getdefaultencoding(),
+                                         text=True)
+        return output.rstrip()
 
     @staticmethod
     def _get_container_id() -> str:
