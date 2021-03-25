@@ -176,7 +176,6 @@ class DockerComposeLibrary:
         if service_names is not None:
             cmd.extend(service_names)
 
-        logger.warn(cmd)
         try:
             subprocess.check_output(cmd,
                                     cwd=self._project_directory,
