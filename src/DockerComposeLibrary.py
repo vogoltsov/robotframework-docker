@@ -119,7 +119,7 @@ class DockerComposeLibrary:
                              no_rm: bool = False,
                              parallel: bool = False,
                              pull: bool = False,
-                             build_args: dict[str, str] = None,
+                             build_args: dict = None,
                              service_names: List[str] = None) -> None:
         """Build or rebuild services.
         All parameters are forwarded to `docker-compose`.
