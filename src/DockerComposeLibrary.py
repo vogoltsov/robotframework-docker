@@ -380,7 +380,12 @@ class DockerComposeLibrary:
 
         info = self._get_exposed_port(service_name, port)
         service = ExposedServiceInfo()
-        service.host = info[0] if not self._is_inside_container() else self._get_container_gateway_ip()
+        if self._is_inside_container():
+            service.host = self._get_container_gateway_ip()
+        elif info[0] == '0.0.0.0':
+            service.host = '127.0.0.1'
+        else:
+            service.host = info[0]
         service.port = info[1]
         return service
 
