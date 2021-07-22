@@ -360,6 +360,75 @@ class DockerComposeLibrary:
             raise AssertionError('Failed to shutdown services: {}'
                                  .format(e.output.rstrip())) from e
 
+    def docker_compose_logs(self,
+                            write_to: str = None,
+                            prefix: bool = True,
+                            timestamps: bool = True,
+                            service_names: List[str] = None) -> None:
+        """Grabs or saves the output from containers.
+
+        `write_to` Name of the log file to use. Can be an absolute or
+        relative path. Relative paths are looked up relative to the
+        working directory of the Robot Framework process, not relative
+        to the Docker Compose project. If not specified, the logs are
+        captured and returned from the keyword.
+
+        `prefix`: If false, `--no-log-prefix` is passed to `docker-compose`
+        (default: True).
+
+        `timestamps`: If true, `--timestamps` is passed to `docker-compose`
+        (default: True).
+
+        `service_names` A list of service names to limit which logs are gotten.
+
+        = Examples =
+
+        Save container logs to a file
+        | Docker Compose Logs | write_to=/tmp/containers.log |
+
+        Grab container logs into a variable
+        | ${logs} = | Docker Compose Logs |
+        """
+
+        cmd: [str] = self._prepare_base_cmd()
+        cmd.append('logs')
+        cmd.append('--no-color')
+
+        if not prefix:
+            cmd.append('--no-log-prefix')
+
+        if timestamps:
+            cmd.append('--timestamps')
+
+        if service_names is not None:
+            cmd.extend(service_names)
+
+        if write_to is not None:
+            # pylint: disable=consider-using-with
+            output_file = open(write_to, 'a')
+            close_output_file = output_file.close
+        else:
+            output_file = subprocess.PIPE
+            close_output_file = lambda: None
+
+        try:
+            process = subprocess.run(cmd,
+                                     check=True,
+                                     cwd=self._project_directory,
+                                     stdin=subprocess.DEVNULL,
+                                     stdout=output_file,
+                                     stderr=subprocess.PIPE,
+                                     encoding=sys.getdefaultencoding(),
+                                     text=True)
+        except subprocess.CalledProcessError as e:
+            raise AssertionError(f'Failed to get logs: {e.stderr}') from e
+        finally:
+            close_output_file()
+
+        if write_to is None:
+            return process.stdout
+        return None
+
     def get_exposed_service(self,
                             service_name: str,
                             port: int):
