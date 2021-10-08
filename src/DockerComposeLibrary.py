@@ -63,8 +63,7 @@ class DockerComposeLibrary:
         else:
             self._project_directory = os.path.dirname(self._file)
 
-        logger.info('Docker Compose project "{}" initialized using configuration file: {}'
-                    .format(self._project_name, self._file))
+        logger.info(f'Docker Compose project "{self._project_name}" initialized using configuration file: {self._file}')
 
     # pylint: disable=R0912, R0913, C0103
     def docker_compose_pull(self,
@@ -108,8 +107,7 @@ class DockerComposeLibrary:
                                     encoding=sys.getdefaultencoding(),
                                     text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError('Failed to pull image(s): {}'
-                                 .format(e.output.rstrip())) from e
+            raise AssertionError(f'Failed to pull image(s): {e.output.rstrip()}') from e
 
     # pylint: disable=R0912, R0913, C0103
     def docker_compose_build(self,
@@ -184,8 +182,7 @@ class DockerComposeLibrary:
                                     encoding=sys.getdefaultencoding(),
                                     text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError('Failed to build image(s): {}'
-                                 .format(e.output.rstrip())) from e
+            raise AssertionError(f'Failed to build image(s): {e.output.rstrip()}') from e
 
     # pylint: disable=R0912, R0913, C0103
     def docker_compose_up(self,
@@ -252,8 +249,7 @@ class DockerComposeLibrary:
                 cmd.append('--always-recreate-deps')
         elif always_recreate_deps is not None:
             logger.warn('Docker Compose Up: --always-recreate-deps option'
-                        ' is not supported for docker-compose version {}'
-                        .format(self._docker_compose_version))
+                        f' is not supported for docker-compose version {self._docker_compose_version}')
 
         if no_recreate:
             cmd.append('--no-recreate')
@@ -272,8 +268,7 @@ class DockerComposeLibrary:
                 cmd.append('--renew-anon-volumes')
         elif always_recreate_deps is not None:
             logger.warn('Docker Compose Up: --renew-anon-volumes option'
-                        ' is not supported for docker-compose version {}'
-                        .format(self._docker_compose_version))
+                        f' is not supported for docker-compose version {self._docker_compose_version}')
 
         if remove_orphans:
             cmd.append('--remove-orphans')
@@ -289,8 +284,7 @@ class DockerComposeLibrary:
                                     encoding=sys.getdefaultencoding(),
                                     text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError('Failed to start services: {}'
-                                 .format(e.output.rstrip())) from e
+            raise AssertionError(f'Failed to start services: {e.output.rstrip()}') from e
 
     def docker_compose_down(self,
                             timeout: str = None,
@@ -336,8 +330,7 @@ class DockerComposeLibrary:
             cmd.append(str(int(convert_time(timeout))))
         elif timeout is not None:
             logger.warn('Docker Compose Down: --timeout option'
-                        ' is not supported for docker-compose version {}'
-                        .format(self._docker_compose_version))
+                        f' is not supported for docker-compose version {self._docker_compose_version}')
 
         if rmi is not None:
             cmd.append('--rmi')
@@ -357,8 +350,7 @@ class DockerComposeLibrary:
                                     encoding=sys.getdefaultencoding(),
                                     text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError('Failed to shutdown services: {}'
-                                 .format(e.output.rstrip())) from e
+            raise AssertionError(f'Failed to shutdown services: {e.output.rstrip()}') from e
 
     def docker_compose_logs(self,
                             write_to: str = None,
@@ -405,7 +397,7 @@ class DockerComposeLibrary:
 
         if write_to is not None:
             # pylint: disable=consider-using-with
-            output_file = open(write_to, 'a')
+            output_file = open(write_to, 'a', encoding=sys.getdefaultencoding())
             close_output_file = output_file.close
         else:
             output_file = subprocess.PIPE
@@ -479,7 +471,7 @@ class DockerComposeLibrary:
             raise AssertionError(e.output.rstrip()) from e
         result = output.rstrip().split(':')
         if len(result) == 1:
-            raise AssertionError('Port {} is not exposed for service {}'.format(port, service_name))
+            raise AssertionError(f'Port {port} is not exposed for service {service_name}')
         return result
 
     def _prepare_base_cmd(self) -> [str]:
@@ -533,5 +525,5 @@ class DockerComposeLibrary:
     @staticmethod
     def _get_container_id() -> str:
         """Helper function to retrieve current Docker container id."""
-        with open('/proc/1/cpuset', 'r') as file:
+        with open('/proc/1/cpuset', 'r', encoding=sys.getdefaultencoding()) as file:
             return file.read().rstrip().split('/')[2]
