@@ -4,3 +4,4 @@ services:
     image: 'httpd:alpine'
     ports:
     - ${HTTPD_PORT}
+    - '514/udp'

@@ -62,3 +62,20 @@ Cannot Connect to Container Port
     ...                 *Connection refused*
     ...                 Open Connection     host=${service.host}  port=80
     [Teardown]
+
+
+Can Get UDP Service Host and Port
+    Docker Compose Up
+    ${service} =        Get Exposed Service  httpd  514  protocol=udp
+    Should Match Regexp
+    ...                 ${service.host}
+    ...                 ^\\d{1,3}\\\.\\d{1,3}\\\.\\d{1,3}\\\.\\d{1,3}$
+    Should Match Regexp
+    ...                 ${service.port}
+    ...                 ^\\d{1,5}$
+
+Cannot Get Exposed UDP Service With Default Protocol
+    Docker Compose Up
+    Run Keyword And Expect Error
+    ...                 Port 514 is not exposed for service httpd
+    ...                 Get Exposed Service  httpd  514

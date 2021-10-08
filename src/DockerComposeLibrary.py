@@ -431,7 +431,8 @@ class DockerComposeLibrary:
 
     def get_exposed_service(self,
                             service_name: str,
-                            port: int):
+                            port: int,
+                            protocol: str = None):
         """Retrieves host address and port number for a port exposed by service.
 
         `service_name` Service name from Compose file.
@@ -446,7 +447,7 @@ class DockerComposeLibrary:
         | Log To Console | Services is located at ${service.host}:${service.port} |
         """
 
-        info = self._get_exposed_port(service_name, port)
+        info = self._get_exposed_port(service_name, port, protocol)
         service = ExposedServiceInfo()
         if self._is_inside_container():
             service.host = self._get_container_gateway_ip()
@@ -457,12 +458,16 @@ class DockerComposeLibrary:
         service.port = info[1]
         return service
 
-    def _get_exposed_port(self, service_name: str, port: int) -> [str]:
+    def _get_exposed_port(self, service_name: str, port: int, protocol: str) -> [str]:
         """Helper function to retrieve info about exposed port by calling 'docker-compose port'."""
         cmd = self._prepare_base_cmd()
         cmd.append('port')
+        if protocol is not None:
+            cmd.append('--protocol')
+            cmd.append(protocol)
         cmd.append(service_name)
         cmd.append(str(port))
+
         try:
             output = subprocess.check_output(cmd,
                                              cwd=self._project_directory,
