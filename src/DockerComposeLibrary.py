@@ -56,7 +56,7 @@ class DockerComposeLibrary:
         if project_name is not None:
             self._project_name = project_name
         else:
-            self._project_name = BuiltIn().get_variable_value('${SUITE NAME}')
+            self._project_name = re.sub(r'\W', '_', BuiltIn().get_variable_value('${SUITE NAME}'), re.ASCII).lower()
 
         if project_directory is not None:
             self._project_directory = project_directory
