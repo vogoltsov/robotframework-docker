@@ -3,4 +3,4 @@ pylint
 setuptools
 # project dependencies
 packaging
-robotframework>=4,<5
+robotframework>=4,<6

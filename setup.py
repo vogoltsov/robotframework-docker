@@ -33,7 +33,7 @@ setup(
     package_dir={'': 'src'},
     py_modules=['DockerComposeLibrary'],
     install_requires=[
-        'robotframework>=4,<5',
+        'robotframework>=4,<6',
         'packaging',
     ],
 )
