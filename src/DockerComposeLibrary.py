@@ -49,9 +49,8 @@ class DockerComposeLibrary:
         if file is not None:
             self._file = file
         else:
-            suite_source = BuiltIn().get_variable_value('${SUITE SOURCE}')
-            suite_directory = os.path.dirname(suite_source)
-            self._file = os.path.join(suite_directory, 'docker-compose.yml')
+            # by default, use docker-compose.yml located in the suite directory
+            self._file = 'docker-compose.yml'
 
         if project_name is not None:
             self._project_name = project_name
@@ -61,7 +60,14 @@ class DockerComposeLibrary:
         if project_directory is not None:
             self._project_directory = project_directory
         else:
-            self._project_directory = os.path.dirname(self._file)
+            # by default, use suite directory as project directory
+            suite_source = BuiltIn().get_variable_value('${SUITE SOURCE}')
+            self._project_directory = os.path.dirname(suite_source)
+
+        # if file path is not absolute, it is considered to be relative to a suite directory
+        if not os.path.isabs(self._file):
+            suite_source = BuiltIn().get_variable_value('${SUITE SOURCE}')
+            self._file = os.path.join(os.path.dirname(suite_source), self._file)
 
         logger.info(f'Docker Compose project "{self._project_name}" initialized using configuration file: {self._file}')
 
