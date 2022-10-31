@@ -525,5 +525,9 @@ class DockerComposeLibrary:
     @staticmethod
     def _get_container_id() -> str:
         """Helper function to retrieve current Docker container id."""
-        with open('/proc/1/cpuset', 'r', encoding=sys.getdefaultencoding()) as file:
-            return file.read().rstrip().split('/')[2]
+        with open('/proc/self/mountinfo', 'r', encoding=sys.getdefaultencoding()) as file:
+            for line in iter(file.readline, b''):
+                if '/docker/containers/' not in line:
+                    continue
+                return line.split('/docker/containers/')[-1].split('/')[0]
+            raise AssertionError('Failed to obtain container id')
