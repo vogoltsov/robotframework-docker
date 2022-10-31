@@ -401,7 +401,7 @@ class DockerComposeLibrary:
             close_output_file = output_file.close
         else:
             output_file = subprocess.PIPE
-            close_output_file = lambda: None
+            close_output_file = DockerComposeLibrary._do_nothing
 
         try:
             process = subprocess.run(cmd,
@@ -531,3 +531,7 @@ class DockerComposeLibrary:
                     continue
                 return line.split('/docker/containers/')[-1].split('/')[0]
             raise AssertionError('Failed to obtain container id')
+
+    @staticmethod
+    def _do_nothing(*args):
+        pass
