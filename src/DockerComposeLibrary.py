@@ -204,6 +204,7 @@ class DockerComposeLibrary:
                           build: bool = False,
                           renew_anon_volumes: bool = True,
                           remove_orphans: bool = True,
+                          wait: bool = None,
                           service_names: List[str] = None) -> None:
         """Builds, (re)creates, starts, and attaches to containers for a service.
         All parameters are forwarded to `docker-compose`.
@@ -230,6 +231,8 @@ class DockerComposeLibrary:
         `remove_orphans` Remove containers for services not defined
         in the Compose file (default: True).
 
+        `wait` Wait for services to be running|healthy (default: True).
+
         `service_names` A list of service names to be started.
         All services are started by default.
 
@@ -252,12 +255,12 @@ class DockerComposeLibrary:
         if force_recreate:
             cmd.append('--force-recreate')
 
-        if self._docker_compose_version >= packaging.version.parse('1.19.0'):
-            if always_recreate_deps is None or always_recreate_deps is True:
-                cmd.append('--always-recreate-deps')
-        elif always_recreate_deps is not None:
+        if self._docker_compose_version < packaging.version.Version('1.19.0') and always_recreate_deps:
             logger.warn('Docker Compose Up: --always-recreate-deps option'
-                        f' is not supported for docker-compose version {self._docker_compose_version}')
+                        f' is only supported since Docker Compose version v1.19.0'
+                        f' (using Docker Compose v{self._docker_compose_version})')
+        elif always_recreate_deps or always_recreate_deps is None:
+            cmd.append('--always-recreate-deps')
 
         if no_recreate:
             cmd.append('--no-recreate')
@@ -271,15 +274,22 @@ class DockerComposeLibrary:
         if build:
             cmd.append('--build')
 
-        if self._docker_compose_version >= packaging.version.parse('1.19.0'):
-            if renew_anon_volumes is None or renew_anon_volumes is True:
-                cmd.append('--renew-anon-volumes')
-        elif always_recreate_deps is not None:
-            logger.warn('Docker Compose Up: --renew-anon-volumes option'
-                        f' is not supported for docker-compose version {self._docker_compose_version}')
+        if self._docker_compose_version < packaging.version.Version('1.19.0') and renew_anon_volumes:
+            logger.warn('Docker Compose Up: --renew-anon-volumes'
+                        f' is only supported since Docker Compose version v1.19.0'
+                        f' (using Docker Compose v{self._docker_compose_version})')
+        elif renew_anon_volumes or renew_anon_volumes is None:
+            cmd.append('--renew-anon-volumes')
 
         if remove_orphans:
             cmd.append('--remove-orphans')
+
+        if self._docker_compose_version < packaging.version.Version('2.0.0') and wait:
+            logger.warn('Docker Compose Up: --wait'
+                        f' is only supported since Docker Compose version v2.0.0'
+                        f' (using Docker Compose v{self._docker_compose_version})')
+        elif wait or wait is None:
+            cmd.append('--wait')
 
         if service_names is not None:
             cmd.extend(service_names)
@@ -331,14 +341,13 @@ class DockerComposeLibrary:
         cmd: [str] = self._prepare_base_cmd()
         cmd.append('down')
 
-        if self._docker_compose_version >= packaging.version.parse('1.18.0'):
-            if timeout is None:
-                timeout = '10 seconds'
+        if self._docker_compose_version < packaging.version.Version('1.18.0') and timeout is not None:
+            logger.warn('Docker Compose Up: --timeout'
+                        f' is only supported since Docker Compose version v1.18.0'
+                        f' (using Docker Compose v{self._docker_compose_version})')
+        else:
             cmd.append('--timeout')
-            cmd.append(str(int(convert_time(timeout))))
-        elif timeout is not None:
-            logger.warn('Docker Compose Down: --timeout option'
-                        f' is not supported for docker-compose version {self._docker_compose_version}')
+            cmd.append(str(int(convert_time(timeout or '10 seconds'))))
 
         if rmi is not None:
             cmd.append('--rmi')
