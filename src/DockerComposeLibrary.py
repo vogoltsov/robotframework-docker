@@ -71,7 +71,8 @@ class DockerComposeLibrary:
             suite_source = BuiltIn().get_variable_value('${SUITE SOURCE}')
             self._file = os.path.join(os.path.dirname(suite_source), self._file)
 
-        logger.info(f'Docker Compose project "{self._project_name}" initialized using configuration file: {self._file}')
+        logger.info(f'[Docker Compose Library] Project "{self._project_name}"'
+                    f' initialized using configuration file: {self._file}')
 
     # pylint: disable=R0912, R0913, C0103
     def docker_compose_pull(self,
@@ -115,7 +116,7 @@ class DockerComposeLibrary:
                                     encoding=sys.getdefaultencoding(),
                                     text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError(f'Failed to pull image(s): {e.output.rstrip()}') from e
+            raise AssertionError(f'[Docker Compose Pull] Failed to pull image(s): {e.output.rstrip()}') from e
 
     # pylint: disable=R0912, R0913, C0103
     def docker_compose_build(self,
@@ -190,7 +191,7 @@ class DockerComposeLibrary:
                                     encoding=sys.getdefaultencoding(),
                                     text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError(f'Failed to build image(s): {e.output.rstrip()}') from e
+            raise AssertionError(f'[Docker Compose Build] Failed to build image(s): {e.output.rstrip()}') from e
 
     # pylint: disable=R0912, R0913, C0103
     def docker_compose_up(self,
@@ -256,7 +257,7 @@ class DockerComposeLibrary:
             cmd.append('--force-recreate')
 
         if self._docker_compose_version < packaging.version.Version('1.19.0') and always_recreate_deps:
-            logger.warn('Docker Compose Up: --always-recreate-deps option'
+            logger.warn('[Docker Compose Up] option --always-recreate-deps'
                         f' is only supported since Docker Compose version v1.19.0'
                         f' (using Docker Compose v{self._docker_compose_version})')
         elif always_recreate_deps or always_recreate_deps is None:
@@ -275,7 +276,7 @@ class DockerComposeLibrary:
             cmd.append('--build')
 
         if self._docker_compose_version < packaging.version.Version('1.19.0') and renew_anon_volumes:
-            logger.warn('Docker Compose Up: --renew-anon-volumes'
+            logger.warn('[Docker Compose Up] option --renew-anon-volumes'
                         f' is only supported since Docker Compose version v1.19.0'
                         f' (using Docker Compose v{self._docker_compose_version})')
         elif renew_anon_volumes or renew_anon_volumes is None:
@@ -285,7 +286,7 @@ class DockerComposeLibrary:
             cmd.append('--remove-orphans')
 
         if self._docker_compose_version < packaging.version.Version('2.0.0') and wait:
-            logger.warn('Docker Compose Up: --wait'
+            logger.warn('[Docker Compose Up] option --wait'
                         f' is only supported since Docker Compose version v2.0.0'
                         f' (using Docker Compose v{self._docker_compose_version})')
         elif wait or wait is None:
@@ -302,7 +303,7 @@ class DockerComposeLibrary:
                                     encoding=sys.getdefaultencoding(),
                                     text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError(f'Failed to start services: {e.output.rstrip()}') from e
+            raise AssertionError(f'[Docker Compose Up] Failed to start services: {e.output.rstrip()}') from e
 
     def docker_compose_down(self,
                             timeout: str = None,
@@ -342,7 +343,7 @@ class DockerComposeLibrary:
         cmd.append('down')
 
         if self._docker_compose_version < packaging.version.Version('1.18.0') and timeout is not None:
-            logger.warn('Docker Compose Up: --timeout'
+            logger.warn('[Docker Compose Down] option --timeout'
                         f' is only supported since Docker Compose version v1.18.0'
                         f' (using Docker Compose v{self._docker_compose_version})')
         else:
@@ -367,7 +368,7 @@ class DockerComposeLibrary:
                                     encoding=sys.getdefaultencoding(),
                                     text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError(f'Failed to shutdown services: {e.output.rstrip()}') from e
+            raise AssertionError(f'[Docker Compose Down] Failed to shutdown services: {e.output.rstrip()}') from e
 
     def docker_compose_logs(self,
                             write_to: str = None,
@@ -430,7 +431,7 @@ class DockerComposeLibrary:
                                      encoding=sys.getdefaultencoding(),
                                      text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError(f'Failed to get logs: {e.stderr}') from e
+            raise AssertionError(f'[Docker Compose Logs] Failed to get service logs: {e.stderr}') from e
         finally:
             close_output_file()
 
@@ -485,13 +486,14 @@ class DockerComposeLibrary:
                                              encoding=sys.getdefaultencoding(),
                                              text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError(e.output.rstrip()) from e
+            raise AssertionError(
+                f'[Get Exposed Service] Failed to query exposed ports for service {service_name}: {e.stderr}') from e
 
         # Docker Compose V1 returns empty string when querying port that is not exposed.
         # Docker Compose V2 returns string ':0' in this case.
         result = output.rstrip().split(':')
         if len(result) != 2 or (result[0] == '' and result[1] == '0'):
-            raise AssertionError(f'Port {port} is not exposed for service {service_name}')
+            raise AssertionError(f'[Get Exposed Service] Port {port} is not exposed for service {service_name}')
 
         return result
 
@@ -544,7 +546,7 @@ class DockerComposeLibrary:
             self._docker_compose_cmd = ['docker-compose']
             self._docker_compose_version = self._parse_docker_compose_version(version_string)
         except subprocess.CalledProcessError as e:
-            raise AssertionError('Unable to find Docker Compose on path') from e
+            raise AssertionError('[Docker Compose Library] Unable to find Docker Compose on path') from e
 
     @staticmethod
     def _parse_docker_compose_version(version_string: str) -> packaging.version.Version:
@@ -553,7 +555,7 @@ class DockerComposeLibrary:
             version_string = re.findall(r'(\d+\.(?:\d+\.)*\d+)', version_string)[0]
             return packaging.version.Version(version_string)
         except packaging.version.InvalidVersion as e:
-            raise AssertionError('Could not parse docker-compose version') from e
+            raise AssertionError('[Docker Compose Library] Could not parse docker-compose version') from e
 
     @staticmethod
     def _is_inside_container() -> bool:
@@ -585,7 +587,7 @@ class DockerComposeLibrary:
                 if '/docker/containers/' not in line:
                     continue
                 return line.split('/docker/containers/')[-1].split('/')[0]
-            raise AssertionError('Failed to obtain container id')
+            raise AssertionError('[Docker Compose Library] Failed to obtain container id')
 
     @staticmethod
     def _do_nothing(*args):

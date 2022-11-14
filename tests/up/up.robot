@@ -18,7 +18,7 @@ Cannot Start Service by Name If It Does Not Exist
     @{service_names} =  Create List
     ...                 unknown
     Run Keyword And Expect Error
-    ...                 *no such service: unknown*
+    ...                 [[]Docker Compose Up[]] Failed to start services*
     ...                 Docker Compose Up
     ...                 service_names=${service_names}
 
@@ -35,18 +35,18 @@ Can Get Service Host and Port
 Cannot Get Exposed Service If Port Is Not Exposed
     Docker Compose Up
     Run Keyword And Expect Error
-    ...                 Port 123 is not exposed for service httpd
+    ...                 [[]Get Exposed Service[]] Port 123 is not exposed for service httpd
     ...                 Get Exposed Service  httpd  123
 
 Cannot Get Exposed Service If Service Does Not Exist
     Docker Compose Up
     Run Keyword And Expect Error
-    ...                 *no container found for unknown*
+    ...                 [[]Get Exposed Service[]] Failed to query exposed ports for service unknown:*
     ...                 Get Exposed Service  unknown  80
 
 Cannot Get Exposed Service If Service Is Not Started
     Run Keyword And Expect Error
-    ...                 *no container found for unknown*
+    ...                 [[]Get Exposed Service[]] Failed to query exposed ports for service unknown:*
     ...                 Get Exposed Service  unknown  80
 
 Can Connect to Exposed Service
@@ -77,5 +77,5 @@ Can Get UDP Service Host and Port
 Cannot Get Exposed UDP Service With Default Protocol
     Docker Compose Up
     Run Keyword And Expect Error
-    ...                 Port 514 is not exposed for service httpd
+    ...                 [[]Get Exposed Service[]] Port 514 is not exposed for service httpd
     ...                 Get Exposed Service  httpd  514
