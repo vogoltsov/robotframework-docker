@@ -28,15 +28,16 @@ class DockerComposeLibrary:
 
     ROBOT_LIBRARY_SCOPE = 'TEST SUITE'
 
+    _docker_compose_cmd: [str]
     _docker_compose_version: packaging.version.Version
     _file: str = None
     _project_name: str = None
     _project_directory: str = None
 
     def __init__(self,
-                 file=None,
-                 project_name=None,
-                 project_directory=None):
+                 file: str = None,
+                 project_name: str = None,
+                 project_directory: str = None):
         """Initializes an instance of DockerComposeLibrary to use a given Compose file and project name.
 
         `file` Path to compose file. By default, tries to use 'docker-compose.yml'
@@ -44,7 +45,8 @@ class DockerComposeLibrary:
 
         `project_name` Specify an alternate project name (default: test suite name).
         """
-        self._docker_compose_version = self._get_docker_compose_version()
+        self._find_docker_compose()
+        logger.info(f'[Docker Compose Library] Using Docker Compose v${self._docker_compose_version}')
 
         if file is not None:
             self._file = file
@@ -362,7 +364,7 @@ class DockerComposeLibrary:
                             write_to: str = None,
                             prefix: bool = True,
                             timestamps: bool = True,
-                            service_names: List[str] = None) -> None:
+                            service_names: List[str] = None) -> str:
         """Grabs or saves the output from containers.
 
         `write_to` Name of the log file to use. Can be an absolute or
@@ -475,21 +477,50 @@ class DockerComposeLibrary:
                                              text=True)
         except subprocess.CalledProcessError as e:
             raise AssertionError(e.output.rstrip()) from e
+
+        # Docker Compose V1 returns empty string when querying port that is not exposed.
+        # Docker Compose V2 returns string ':0' in this case.
         result = output.rstrip().split(':')
-        if len(result) == 1:
+        if len(result) != 2 or (result[0] == '' and result[1] == '0'):
             raise AssertionError(f'Port {port} is not exposed for service {service_name}')
+
         return result
 
     def _prepare_base_cmd(self) -> [str]:
         """Helper function to create a 'docker-compose' command with project name and file arguments."""
-        return [
-            'docker-compose',
-            '--project-name', self._project_name,
-            '--file', self._file,
-        ]
+        cmd = self._docker_compose_cmd.copy()
 
-    def _get_docker_compose_version(self) -> packaging.version.Version:
-        """Helper function to retrieve docker-compose version"""
+        cmd.append('--project-name')
+        cmd.append(self._project_name)
+
+        cmd.append('--file')
+        cmd.append(self._file)
+
+        return cmd
+
+    def _find_docker_compose(self) -> [str]:
+        """Helper function to find and set Docker Compose executable and version"""
+        # noinspection PyBroadException
+        try:
+            cmd = [
+                'docker',
+                'compose',
+                'version'
+            ]
+            version_string = subprocess.check_output(cmd,
+                                                     cwd=self._project_directory,
+                                                     stdin=subprocess.DEVNULL,
+                                                     stderr=subprocess.STDOUT,
+                                                     encoding=sys.getdefaultencoding(),
+                                                     text=True).rstrip()
+
+            self._docker_compose_cmd = ['docker', 'compose']
+            self._docker_compose_version = self._parse_docker_compose_version(version_string)
+            return
+        except subprocess.CalledProcessError:
+            pass
+
+        # Fall back to Docker Compose V1.
         try:
             cmd = [
                 'docker-compose',
@@ -501,10 +532,19 @@ class DockerComposeLibrary:
                                                      stderr=subprocess.STDOUT,
                                                      encoding=sys.getdefaultencoding(),
                                                      text=True).rstrip()
-            version_string = re.findall(r'(?:(\d+\.(?:\d+\.)*\d+))', version_string)[0]
-            return packaging.version.parse(version_string)
-        except Exception as e:
-            raise AssertionError('Could not determine docker-compose version') from e
+            self._docker_compose_cmd = ['docker-compose']
+            self._docker_compose_version = self._parse_docker_compose_version(version_string)
+        except subprocess.CalledProcessError as e:
+            raise AssertionError('Unable to find Docker Compose on path') from e
+
+    @staticmethod
+    def _parse_docker_compose_version(version_string: str) -> packaging.version.Version:
+        """Helper function to parse Docker Compose version string"""
+        try:
+            version_string = re.findall(r'(\d+\.(?:\d+\.)*\d+)', version_string)[0]
+            return packaging.version.Version(version_string)
+        except packaging.version.InvalidVersion as e:
+            raise AssertionError('Could not parse docker-compose version') from e
 
     @staticmethod
     def _is_inside_container() -> bool:

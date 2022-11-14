@@ -18,7 +18,7 @@ Cannot Start Service by Name If It Does Not Exist
     @{service_names} =  Create List
     ...                 unknown
     Run Keyword And Expect Error
-    ...                 *No such service*
+    ...                 *no such service: unknown*
     ...                 Docker Compose Up
     ...                 service_names=${service_names}
 
@@ -41,12 +41,12 @@ Cannot Get Exposed Service If Port Is Not Exposed
 Cannot Get Exposed Service If Service Does Not Exist
     Docker Compose Up
     Run Keyword And Expect Error
-    ...                 No such service: unknown
+    ...                 *no container found for unknown*
     ...                 Get Exposed Service  unknown  80
 
 Cannot Get Exposed Service If Service Is Not Started
     Run Keyword And Expect Error
-    ...                 No such service: unknown
+    ...                 *no container found for unknown*
     ...                 Get Exposed Service  unknown  80
 
 Can Connect to Exposed Service

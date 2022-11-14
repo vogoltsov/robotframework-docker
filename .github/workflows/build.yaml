@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Print Docker Compose version
+        run: |
+          docker compose version
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
