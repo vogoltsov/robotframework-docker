@@ -1,0 +1,10 @@
+version: '2'
+services:
+  httpd1:
+    image: 'httpd:alpine'
+    ports:
+    - ${HTTPD_PORT}
+  httpd2:
+    image: 'httpd:alpine'
+    ports:
+    - ${HTTPD_PORT}

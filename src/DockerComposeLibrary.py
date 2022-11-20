@@ -374,6 +374,54 @@ class DockerComposeLibrary:
         except subprocess.CalledProcessError as e:
             raise AssertionError(f'[Docker Compose Down] Failed to shutdown services: {e.output.rstrip()}') from e
 
+    def docker_compose_kill(self,
+                            remove_orphans: bool = False,
+                            signal: str = None,
+                            service_names: List[str] = None) -> None:
+        """Force stop service containers.
+
+        `signal` SIGNAL to send to the container (default "SIGKILL").
+
+        `remove_orphans` Remove containers for services not defined in the Compose file.
+
+
+        = Examples =
+
+        Kill All Services
+        | Docker Compose Kill |
+
+        Kill Certain Services
+        | @{service_names} = | Create List |
+        | ... | services1 |
+        | ... | services2 |
+        | Docker Compose Kill | service_names=${service_names} |
+        """
+
+        cmd: [str] = self._prepare_base_cmd()
+        cmd.append('kill')
+
+        if remove_orphans:
+            cmd.append('--remove-orphans')
+
+        if signal is not None:
+            cmd.append('--signal')
+            cmd.append(signal)
+
+        if service_names is not None:
+            cmd.extend(service_names)
+
+        try:
+            output = subprocess.check_output(cmd,
+                                             cwd=self._project_directory,
+                                             stdin=subprocess.DEVNULL,
+                                             stderr=subprocess.STDOUT,
+                                             encoding=sys.getdefaultencoding(),
+                                             text=True)
+            if output == 'no container to kill':
+                raise AssertionError(f'[Docker Compose Kill] No container(s) to kill for service: ${service_names}')
+        except subprocess.CalledProcessError as e:
+            raise AssertionError(f'[Docker Compose Kill] Failed to kill services: {e.output.rstrip()}') from e
+
     def docker_compose_logs(self,
                             write_to: str = None,
                             prefix: bool = True,
