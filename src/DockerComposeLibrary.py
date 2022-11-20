@@ -350,7 +350,7 @@ class DockerComposeLibrary:
             logger.warn('[Docker Compose Down] option --timeout'
                         f' is only supported since Docker Compose version v1.18.0'
                         f' (using Docker Compose v{self._docker_compose_version})')
-        else:
+        elif timeout is not None:
             cmd.append('--timeout')
             cmd.append(str(int(convert_time(timeout or '10 seconds'))))
 
@@ -373,6 +373,127 @@ class DockerComposeLibrary:
                                     text=True)
         except subprocess.CalledProcessError as e:
             raise AssertionError(f'[Docker Compose Down] Failed to shutdown services: {e.output.rstrip()}') from e
+
+    def docker_compose_start(self,
+                             service_names: List[str] = None) -> None:
+        """Start services.
+
+        `timeout` Specify stop timeout in seconds (default: 10).
+
+        `service_names` A list of service names to be started.
+
+
+        = Examples =
+
+        Start All Services
+        | Docker Compose Start |
+
+        Start Certain Services
+        | @{service_names} = | Create List |
+        | ... | services1 |
+        | ... | services2 |
+        | Docker Compose Start | service_names=${service_names} |
+        """
+
+        cmd: [str] = self._prepare_base_cmd()
+        cmd.append('start')
+
+        if service_names is not None:
+            cmd.extend(service_names)
+
+        try:
+            subprocess.check_output(cmd,
+                                    cwd=self._project_directory,
+                                    stdin=subprocess.DEVNULL,
+                                    stderr=subprocess.STDOUT,
+                                    encoding=sys.getdefaultencoding(),
+                                    text=True)
+        except subprocess.CalledProcessError as e:
+            raise AssertionError(f'[Docker Compose Start] Failed to start services: {e.output.rstrip()}') from e
+
+    def docker_compose_stop(self,
+                            timeout: str = '10 seconds',
+                            service_names: List[str] = None) -> None:
+        """Stop services.
+
+        `timeout` Specify stop timeout in seconds (default: 10).
+
+        `service_names` A list of service names to be stopped.
+
+
+        = Examples =
+
+        Stop All Services
+        | Docker Compose Stop |
+
+        Stop Certain Services
+        | @{service_names} = | Create List |
+        | ... | services1 |
+        | ... | services2 |
+        | Docker Compose Stop | service_names=${service_names} |
+        """
+
+        cmd: [str] = self._prepare_base_cmd()
+        cmd.append('stop')
+
+        if timeout is not None:
+            cmd.append('--timeout')
+            cmd.append(str(int(convert_time(timeout or '10 seconds'))))
+
+        if service_names is not None:
+            cmd.extend(service_names)
+
+        try:
+            subprocess.check_output(cmd,
+                                    cwd=self._project_directory,
+                                    stdin=subprocess.DEVNULL,
+                                    stderr=subprocess.STDOUT,
+                                    encoding=sys.getdefaultencoding(),
+                                    text=True)
+        except subprocess.CalledProcessError as e:
+            raise AssertionError(f'[Docker Compose Stop] Failed to stop services: {e.output.rstrip()}') from e
+
+    def docker_compose_restart(self,
+                               timeout: str = '10 seconds',
+                               service_names: List[str] = None) -> None:
+        """Restart services.
+
+        `timeout` Specify stop timeout in seconds (default: 10).
+
+        `service_names` A list of service names to be restarted.
+
+
+        = Examples =
+
+        Restart All Services
+        | Docker Compose Restart |
+
+        Restart Certain Services
+        | @{service_names} = | Create List |
+        | ... | services1 |
+        | ... | services2 |
+        | Docker Compose Restart | service_names=${service_names} |
+        """
+
+        cmd: [str] = self._prepare_base_cmd()
+        cmd.append('restart')
+
+        if timeout is not None:
+            cmd.append('--timeout')
+            cmd.append(str(int(convert_time(timeout or '10 seconds'))))
+
+        if service_names is not None:
+            cmd.extend(service_names)
+
+        try:
+            subprocess.check_output(cmd,
+                                    cwd=self._project_directory,
+                                    stdin=subprocess.DEVNULL,
+                                    stderr=subprocess.STDOUT,
+                                    encoding=sys.getdefaultencoding(),
+                                    text=True)
+        except subprocess.CalledProcessError as e:
+            raise AssertionError(f'[Docker Compose Restart] Failed to restart services: {e.output.rstrip()}') from e
 
     def docker_compose_kill(self,
                             remove_orphans: bool = False,
