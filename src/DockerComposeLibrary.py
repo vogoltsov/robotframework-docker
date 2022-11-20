@@ -422,6 +422,76 @@ class DockerComposeLibrary:
         except subprocess.CalledProcessError as e:
             raise AssertionError(f'[Docker Compose Kill] Failed to kill services: {e.output.rstrip()}') from e
 
+    def docker_compose_pause(self,
+                             service_names: List[str] = None) -> None:
+        """Pause services.
+
+        `service_names` A list of service names to be paused.
+
+
+        = Examples =
+
+        Pause All Services
+        | Docker Compose Pause |
+
+        Pause Certain Services
+        | @{service_names} = | Create List |
+        | ... | services1 |
+        | ... | services2 |
+        | Docker Compose Pause | service_names=${service_names} |
+        """
+
+        cmd: [str] = self._prepare_base_cmd()
+        cmd.append('pause')
+
+        if service_names is not None:
+            cmd.extend(service_names)
+
+        try:
+            subprocess.check_output(cmd,
+                                    cwd=self._project_directory,
+                                    stdin=subprocess.DEVNULL,
+                                    stderr=subprocess.STDOUT,
+                                    encoding=sys.getdefaultencoding(),
+                                    text=True)
+        except subprocess.CalledProcessError as e:
+            raise AssertionError(f'[Docker Compose Pause] Failed to pause services: {e.output.rstrip()}') from e
+
+    def docker_compose_unpause(self,
+                               service_names: List[str] = None) -> None:
+        """Unpause services.
+
+        `service_names` A list of service names to be unpaused.
+
+
+        = Examples =
+
+        Unpause All Services
+        | Docker Compose Unpause |
+
+        Unpause Certain Services
+        | @{service_names} = | Create List |
+        | ... | services1 |
+        | ... | services2 |
+        | Docker Compose Unpause | service_names=${service_names} |
+        """
+
+        cmd: [str] = self._prepare_base_cmd()
+        cmd.append('unpause')
+
+        if service_names is not None:
+            cmd.extend(service_names)
+
+        try:
+            subprocess.check_output(cmd,
+                                    cwd=self._project_directory,
+                                    stdin=subprocess.DEVNULL,
+                                    stderr=subprocess.STDOUT,
+                                    encoding=sys.getdefaultencoding(),
+                                    text=True)
+        except subprocess.CalledProcessError as e:
+            raise AssertionError(f'[Docker Compose Unpause] Failed to unpause services: {e.output.rstrip()}') from e
+
     def docker_compose_logs(self,
                             write_to: str = None,
                             prefix: bool = True,
