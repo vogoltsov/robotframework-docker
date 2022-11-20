@@ -74,6 +74,10 @@ class DockerComposeLibrary:
         logger.info(f'[Docker Compose Library] Project "{self._project_name}"'
                     f' initialized using configuration file: {self._file}')
 
+    def docker_compose_version(self) -> str:
+        """Returns Docker Compose version."""
+        return self._docker_compose_version.base_version
+
     # pylint: disable=R0912, R0913, C0103
     def docker_compose_pull(self,
                             no_parallel: bool = False,
@@ -442,7 +446,7 @@ class DockerComposeLibrary:
     def get_exposed_service(self,
                             service_name: str,
                             port: int,
-                            protocol: str = None):
+                            protocol: str = None) -> ExposedServiceInfo:
         """Retrieves host address and port number for a port exposed by service.
 
         `service_name` Service name from Compose file.
