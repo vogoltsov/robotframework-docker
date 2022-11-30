@@ -260,10 +260,11 @@ class DockerComposeLibrary:
         if force_recreate:
             cmd.append('--force-recreate')
 
-        if self._docker_compose_version < packaging.version.Version('1.19.0') and always_recreate_deps:
-            logger.warn('[Docker Compose Up] option --always-recreate-deps'
-                        f' is only supported since Docker Compose version v1.19.0'
-                        f' (using Docker Compose v{self._docker_compose_version})')
+        if self._docker_compose_version < packaging.version.Version('1.19.0'):
+            if always_recreate_deps:
+                logger.warn('[Docker Compose Up] option --always-recreate-deps'
+                            f' is only supported since Docker Compose version v1.19.0'
+                            f' (using Docker Compose v{self._docker_compose_version})')
         elif always_recreate_deps or always_recreate_deps is None:
             cmd.append('--always-recreate-deps')
 
@@ -279,20 +280,22 @@ class DockerComposeLibrary:
         if build:
             cmd.append('--build')
 
-        if self._docker_compose_version < packaging.version.Version('1.19.0') and renew_anon_volumes:
-            logger.warn('[Docker Compose Up] option --renew-anon-volumes'
-                        f' is only supported since Docker Compose version v1.19.0'
-                        f' (using Docker Compose v{self._docker_compose_version})')
+        if self._docker_compose_version < packaging.version.Version('1.19.0'):
+            if renew_anon_volumes:
+                logger.warn('[Docker Compose Up] option --renew-anon-volumes'
+                            f' is only supported since Docker Compose version v1.19.0'
+                            f' (using Docker Compose v{self._docker_compose_version})')
         elif renew_anon_volumes or renew_anon_volumes is None:
             cmd.append('--renew-anon-volumes')
 
         if remove_orphans:
             cmd.append('--remove-orphans')
 
-        if self._docker_compose_version < packaging.version.Version('2.0.0') and wait:
-            logger.warn('[Docker Compose Up] option --wait'
-                        f' is only supported since Docker Compose version v2.0.0'
-                        f' (using Docker Compose v{self._docker_compose_version})')
+        if self._docker_compose_version < packaging.version.Version('2.0.0'):
+            if wait:
+                logger.warn('[Docker Compose Up] option --wait'
+                            f' is only supported since Docker Compose version v2.0.0'
+                            f' (using Docker Compose v{self._docker_compose_version})')
         elif wait or wait is None:
             cmd.append('--wait')
 
@@ -346,10 +349,11 @@ class DockerComposeLibrary:
         cmd: [str] = self._prepare_base_cmd()
         cmd.append('down')
 
-        if self._docker_compose_version < packaging.version.Version('1.18.0') and timeout is not None:
-            logger.warn('[Docker Compose Down] option --timeout'
-                        f' is only supported since Docker Compose version v1.18.0'
-                        f' (using Docker Compose v{self._docker_compose_version})')
+        if self._docker_compose_version < packaging.version.Version('1.18.0'):
+            if timeout is not None:
+                logger.warn('[Docker Compose Down] option --timeout'
+                            f' is only supported since Docker Compose version v1.18.0'
+                            f' (using Docker Compose v{self._docker_compose_version})')
         elif timeout is not None:
             cmd.append('--timeout')
             cmd.append(str(int(convert_time(timeout or '10 seconds'))))
