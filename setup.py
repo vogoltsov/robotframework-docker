@@ -27,13 +27,16 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Framework :: Robot Framework :: Library',
     ],
     keywords='testing testautomation robotframework docker docker-compose',
     package_dir={'': 'src'},
     py_modules=['DockerComposeLibrary'],
     install_requires=[
-        'robotframework>=4,<6',
+        'robotframework>=4,<7',
         'packaging',
     ],
 )
