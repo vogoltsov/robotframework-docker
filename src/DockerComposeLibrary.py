@@ -674,7 +674,7 @@ class DockerComposeLibrary:
                                      encoding=sys.getdefaultencoding(),
                                      text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError(f'[Docker Compose Logs] Failed to get service logs: {e.stderr}') from e
+            raise AssertionError(f'[Docker Compose Logs] Failed to get service logs: {e.output.rstrip()}') from e
         finally:
             close_output_file()
 
@@ -729,8 +729,8 @@ class DockerComposeLibrary:
                                              encoding=sys.getdefaultencoding(),
                                              text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError(
-                f'[Get Exposed Service] Failed to query exposed ports for service {service_name}: {e.stderr}') from e
+            raise AssertionError(f'[Get Exposed Service] Failed to query exposed ports for service {service_name}:'
+                                 f' {e.output.rstrip()}') from e
 
         # Docker Compose V1 returns empty string when querying port that is not exposed.
         # Docker Compose V2 returns string ':0' in this case.
