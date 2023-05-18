@@ -733,8 +733,7 @@ class DockerComposeLibrary:
                                              encoding=sys.getdefaultencoding(),
                                              text=True)
         except subprocess.CalledProcessError as e:
-            raise AssertionError(f'[Get Exposed Service] Failed to query exposed ports for service {service_name}:'
-                                 f' {e.output.rstrip()}') from e
+            raise AssertionError(f'[Get Exposed Service] Port {port} is not exposed for service {service_name}') from e
 
         # Docker Compose V1 returns empty string when querying port that is not exposed.
         # Docker Compose V2 returns string ':0' in this case.

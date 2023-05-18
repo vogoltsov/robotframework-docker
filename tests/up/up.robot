@@ -41,12 +41,12 @@ Cannot Get Exposed Service If Port Is Not Exposed
 Cannot Get Exposed Service If Service Does Not Exist
     Docker Compose Up
     Run Keyword And Expect Error
-    ...                 [[]Get Exposed Service[]] Failed to query exposed ports for service unknown:*
+    ...                 [[]Get Exposed Service[]] Port 80 is not exposed for service unknown
     ...                 Get Exposed Service  unknown  80
 
 Cannot Get Exposed Service If Service Is Not Started
     Run Keyword And Expect Error
-    ...                 [[]Get Exposed Service[]] Failed to query exposed ports for service unknown:*
+    ...                 [[]Get Exposed Service[]] Port 80 is not exposed for service unknown
     ...                 Get Exposed Service  unknown  80
 
 Can Connect to Exposed Service
