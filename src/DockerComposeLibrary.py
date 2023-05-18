@@ -11,6 +11,7 @@ from typing import List
 import packaging.version
 from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
+from robot.libraries.BuiltIn import RobotNotRunningError
 from robot.libraries.DateTime import convert_time
 
 
@@ -48,6 +49,17 @@ class DockerComposeLibrary:
         self._find_docker_compose()
         logger.info(f'[Docker Compose Library] Using Docker Compose v${self._docker_compose_version}')
 
+        # get suite name and path to source and don't explode in case the library is created outside Robotframework
+        # see https://github.com/vogoltsov/robotframework-docker/issues/30
+        suite_name = '_'
+        suite_dir = os.getcwd()
+        try:
+            suite_name = BuiltIn().get_variable_value('${SUITE NAME}')
+            suite_source = BuiltIn().get_variable_value('${SUITE SOURCE}')
+            suite_dir = os.path.dirname(suite_source)
+        except RobotNotRunningError:
+            pass
+
         if file is not None:
             self._file = file
         else:
@@ -57,19 +69,17 @@ class DockerComposeLibrary:
         if project_name is not None:
             self._project_name = project_name
         else:
-            self._project_name = re.sub(r'\W', '_', BuiltIn().get_variable_value('${SUITE NAME}'), re.ASCII).lower()
+            self._project_name = re.sub(r'\W', '_', suite_name, re.ASCII).lower()
 
         if project_directory is not None:
             self._project_directory = project_directory
         else:
             # by default, use suite directory as project directory
-            suite_source = BuiltIn().get_variable_value('${SUITE SOURCE}')
-            self._project_directory = os.path.dirname(suite_source)
+            self._project_directory = suite_dir
 
         # if file path is not absolute, it is considered to be relative to a suite directory
         if not os.path.isabs(self._file):
-            suite_source = BuiltIn().get_variable_value('${SUITE SOURCE}')
-            self._file = os.path.join(os.path.dirname(suite_source), self._file)
+            self._file = os.path.join(suite_dir, self._file)
 
         logger.info(f'[Docker Compose Library] Project "{self._project_name}"'
                     f' initialized using configuration file: {self._file}')
