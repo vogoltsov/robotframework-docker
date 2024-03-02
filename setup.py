@@ -30,13 +30,14 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Framework :: Robot Framework :: Library',
     ],
     keywords='testing testautomation robotframework docker docker-compose',
     package_dir={'': 'src'},
     py_modules=['DockerComposeLibrary'],
     install_requires=[
-        'robotframework>=4,<7',
+        'robotframework>=4,<8',
         'packaging',
     ],
 )
