@@ -4,3 +4,4 @@ setuptools
 # project dependencies
 packaging
 robotframework>=4,<8
+telnetlib-313-and-up ; python_version >= '3.13'
