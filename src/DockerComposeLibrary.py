@@ -132,7 +132,7 @@ class DockerComposeLibrary:
         except subprocess.CalledProcessError as e:
             raise AssertionError(f'[Docker Compose Pull] Failed to pull image(s): {e.output.rstrip()}') from e
 
-    # pylint: disable=R0912, R0913, C0103
+    # pylint: disable=R0912, R0913, R0917, C0103
     def docker_compose_build(self,
                              compress: bool = False,
                              force_rm: bool = False,
@@ -207,7 +207,7 @@ class DockerComposeLibrary:
         except subprocess.CalledProcessError as e:
             raise AssertionError(f'[Docker Compose Build] Failed to build image(s): {e.output.rstrip()}') from e
 
-    # pylint: disable=R0912, R0913, C0103
+    # pylint: disable=R0912, R0913, R0917, C0103
     def docker_compose_up(self,
                           timeout: str = '10 seconds',
                           no_deps: bool = False,
